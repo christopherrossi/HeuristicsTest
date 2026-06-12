@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "nielsen-heuristics-audit": {
+      "source": "mastepanoski/claude-skills",
+      "sourceType": "github",
+      "skillPath": "skills/nielsen-heuristics-audit/SKILL.md",
+      "computedHash": "33fcc98ae4bccfde1d0a8220233c9fd36e3e5575f79dcaae6652693ac94ad59b"
+    }
+  }
+}
