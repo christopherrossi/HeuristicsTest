@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nielsen Heuristics UX Audit — bluecarbon.site</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #1a1a2e;
+    background: #f5f7fa;
+  }
+
+  .page {
+    max-width: 960px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 48px 56px;
+  }
+
+  @media print {
+    body { background: #fff; }
+    .page { padding: 32px 40px; max-width: 100%; }
+    .no-print { display: none; }
+    h2 { page-break-before: auto; }
+    .heuristic-block { page-break-inside: avoid; }
+  }
+
+  /* Header */
+  .report-header {
+    border-bottom: 3px solid #0057b8;
+    padding-bottom: 24px;
+    margin-bottom: 32px;
+  }
+  .report-header h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #0057b8;
+    margin-bottom: 6px;
+  }
+  .report-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 8px 24px;
+    margin-top: 16px;
+    font-size: 13px;
+    color: #555;
+  }
+  .report-meta span strong { color: #1a1a2e; }
+
+  /* Score badge */
+  .score-badge {
+    display: inline-block;
+    background: #fff3cd;
+    border: 2px solid #ffc107;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #856404;
+    margin: 16px 0;
+  }
+  .score-label { font-size: 13px; font-weight: 400; color: #856404; margin-left: 6px; }
+
+  /* Sections */
+  h2 {
+    font-size: 19px;
+    font-weight: 700;
+    color: #0057b8;
+    border-left: 4px solid #0057b8;
+    padding-left: 12px;
+    margin: 36px 0 14px;
+  }
+  h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 20px 0 8px;
+  }
+  h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin: 14px 0 6px;
+  }
+  p { margin-bottom: 10px; }
+
+  /* Summary grid */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin: 16px 0 24px;
+  }
+  .summary-card {
+    border-radius: 8px;
+    padding: 14px 16px;
+    text-align: center;
+  }
+  .summary-card .count { font-size: 28px; font-weight: 700; }
+  .summary-card .label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+  .card-total   { background: #e8f0fe; color: #1a56db; }
+  .card-major   { background: #fff3e0; color: #e65100; }
+  .card-minor   { background: #fffde7; color: #f57f17; }
+  .card-cosm    { background: #f3e5f5; color: #6a1b9a; }
+
+  /* Top issues */
+  .top-issues { list-style: none; padding: 0; margin: 0 0 16px; }
+  .top-issues li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    background: #fef9f0;
+    border-left: 4px solid #f57c00;
+  }
+  .top-issues li .num { font-weight: 700; color: #f57c00; min-width: 20px; }
+
+  /* Heuristic blocks */
+  .heuristic-block {
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .heuristic-header {
+    background: #f0f4ff;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .heuristic-header h3 { margin: 0; font-size: 15px; color: #0057b8; }
+  .stars { font-size: 16px; white-space: nowrap; }
+  .heuristic-body { padding: 16px; }
+
+  /* Issues */
+  .issue {
+    background: #fff8f0;
+    border: 1px solid #ffe0b2;
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+  }
+  .issue-title {
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sev-badge {
+    display: inline-block;
+    border-radius: 4px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .sev-3 { background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; }
+  .sev-2 { background: #fffde7; color: #f57f17; border: 1px solid #fff176; }
+  .sev-1 { background: #f3e5f5; color: #6a1b9a; border: 1px solid #ce93d8; }
+
+  .issue-meta { font-size: 12px; color: #777; margin-bottom: 6px; }
+  .issue-meta strong { color: #555; }
+  .issue p { font-size: 13px; margin-bottom: 6px; }
+  .rec-list { list-style: disc; padding-left: 20px; font-size: 13px; color: #333; }
+  .rec-list li { margin-bottom: 3px; }
+
+  /* Positives */
+  .positives { list-style: none; padding: 0; margin: 10px 0 0; }
+  .positives li {
+    font-size: 13px;
+    padding: 5px 10px;
+    background: #e8f5e9;
+    border-left: 3px solid #43a047;
+    border-radius: 0 4px 4px 0;
+    margin-bottom: 5px;
+  }
+
+  /* Action table */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 12px 0 20px;
+  }
+  th {
+    background: #0057b8;
+    color: #fff;
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: 600;
+  }
+  td { padding: 8px 12px; border-bottom: 1px solid #e0e0e0; vertical-align: top; }
+  tr:nth-child(even) td { background: #f7f9ff; }
+
+  /* Timeline */
+  .timeline { list-style: none; padding: 0; }
+  .timeline li {
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+  .tl-imm  { background: #ffebee; border-left: 4px solid #e53935; }
+  .tl-short { background: #fff3e0; border-left: 4px solid #fb8c00; }
+  .tl-long  { background: #e8f5e9; border-left: 4px solid #43a047; }
+  .timeline li strong { display: block; font-size: 13px; margin-bottom: 2px; }
+
+  /* Quick wins */
+  .quick-wins { list-style: none; padding: 0; }
+  .quick-wins li {
+    padding: 8px 12px;
+    background: #e3f2fd;
+    border-left: 3px solid #1e88e5;
+    border-radius: 0 4px 4px 0;
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+
+  /* Footer */
+  .report-footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+    font-size: 12px;
+    color: #888;
+    text-align: center;
+  }
+
+  /* Print button */
+  .print-btn {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: #0057b8;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 22px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,87,184,0.35);
+    z-index: 100;
+  }
+  .print-btn:hover { background: #004499; }
+</style>
+</head>
+<body>
+
+<button class="print-btn no-print" onclick="window.print()">Save as PDF</button>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="report-header">
+    <h1>Nielsen Heuristics UX Audit Report</h1>
+    <div class="report-meta">
+      <span><strong>Interface:</strong> CDK Unify Navigation — 2026 Redesign</span>
+      <span><strong>URL:</strong> https://bluecarbon.site</span>
+      <span><strong>Date:</strong> 2026-06-12</span>
+      <span><strong>Platform:</strong> Web (SaaS)</span>
+      <span><strong>Evaluator:</strong> AI Agent (Nielsen Heuristics Audit Skill v1.0)</span>
+    </div>
+  </div>
+
+  <!-- EXECUTIVE SUMMARY -->
+  <h2>Executive Summary</h2>
+  <p>CDK Unify is a cloud-based dealership workspace that consolidates apps, workflows, AI tools (AIVA), and notifications under a single sign-on experience. The interface combines a login gate with an onboarding setup wizard and a live dashboard. This audit evaluates the publicly accessible login/landing state and the described dashboard structure against Jakob Nielsen's 10 Usability Heuristics.</p>
+
+  <div class="score-badge">6.2 / 10 <span class="score-label">Fair</span></div>
+  <p style="font-size:13px;color:#555;margin-bottom:20px;">The platform shows solid structure and enterprise-grade ambition, but has notable gaps in feedback, error handling, and user control that create friction especially for new users.</p>
+
+  <div class="summary-grid">
+    <div class="summary-card card-total"><div class="count">17</div><div class="label">Total Issues</div></div>
+    <div class="summary-card card-major"><div class="count">6</div><div class="label">Major (3)</div></div>
+    <div class="summary-card card-minor"><div class="count">7</div><div class="label">Minor (2)</div></div>
+    <div class="summary-card card-cosm"><div class="count">4</div><div class="label">Cosmetic (1)</div></div>
+  </div>
+
+  <h3>Top 3 Critical Issues</h3>
+  <ul class="top-issues">
+    <li><span class="num">1</span><span>No inline form validation on login — <strong>Severity 3</strong> — H5: Error Prevention</span></li>
+    <li><span class="num">2</span><span>Setup wizard exit/cancel is ambiguous with no progress persistence — <strong>Severity 3</strong> — H3: User Control and Freedom</span></li>
+    <li><span class="num">3</span><span>Icon-heavy navigation without persistent labels or tooltips — <strong>Severity 3</strong> — H6: Recognition Rather Than Recall</span></li>
+  </ul>
+
+  <!-- FINDINGS -->
+  <h2>Detailed Findings by Heuristic</h2>
+
+  <!-- H1 -->
+  <div class="heuristic-block">
+    <div class="heuristic-header">
+      <h3>H1: Visibility of System Status</h3>
+      <span class="stars">⭐⭐⭐☆☆ 3/5</span>
+    </div>
+    <div class="heuristic-body">
+
+      <div class="issue">
+        <div class="issue-title"><span class="sev-badge sev-2">Minor · 2</span> Issue 1.1 — Product alert lacks severity or resolution status</div>
+        <div class="issue-meta"><strong>Location:</strong> Dashboard — product alert banner ("Appointment Data Issues - CDK Service 06/20/2024")</div>
+        <p>The alert carries no severity indicator and no status (investigating / resolved / monitoring). Its date (06/20/2024) is nearly 2 years stale — users cannot tell if this is an active incident or a historical record.</p>
+        <ul class="rec-list">
+          <li>Add a status badge: <em>Investigating | Monitoring | Resolved</em></li>
+          <li>Include a last-updated timestamp</li>
+          <li>Auto-dismiss resolved alerts or archive them visibly</li>
+        </ul>
+      </div>
+
+      <div class="issue">
+        <div class="issue-title"><span class="sev-badge sev-2">Minor · 2</span> Issue 1.2 — "1 of 2" alert carousel gives no context</div>
+        <div class="issue-meta"><strong>Location:</strong> Dashboard — alert carousel</div>
+        <p>Pagination tells users there are two alerts but gives no preview of what the second alert contains, requiring an extra click to discover urgency.</p>
+        <ul class="rec-list">
+          <li>Show a brief title/preview of the next alert</li>
+          <li>Consider a list view for critical system alerts instead of a carousel</li>
+        </ul>
+      </div>
+
+      <div class="issue">
+        <div class="issue-title"><span class="sev-badge sev-2">Minor · 2</span> Issue 1.3 — No visible loading state after login submission</div>
+        <div class="issue-meta"><strong>Location:</strong> Login form — Sign In action</div>
+        <p>No loading indicator or button-disabled state is described after form submission. Users may click multiple times unsure if their action registered.</p>
+        <ul class="rec-list">
+          <li>Disable "Sign In" button on submit; show spinner or "Signing in…" label</li>
+        </ul>
+      </div>
+
+      <h4>Positive Examples</h4>
+      <ul class="positives">
+        <li>✅ "Step 1 of 7" progress indicator in setup wizard provides clear position awareness</li>
+        <li>✅ AIVA notification badge (showing "2") signals pending items</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- H2 -->
+  <div class="heuristic-block">
+    <div class="heuristic-header">
+      <h3>H2: Match Between System and the Real World</h3>
+      <span class="stars">⭐⭐⭐☆☆ 3/5</span>
+    </div>
+    <div class="heuristic-body">
+
+      <div class="issue">
+        <div class="issue-title"><span class="sev-badge sev-2">Minor · 2</span> Issue 2.1 — "AIVA" is unexplained jargon on first encounter</div>
+        <div class="issue-meta"><strong>Location:</strong> Navigation header — AIVA section</div>
+        <p>New dealership staff won't know if AIVA is an AI assistant, analytics panel, or something else. No explanation is provided at the point of first contact.</p>
+        <ul class="rec-list">
+          <li>Add a subtitle: "AIVA — AI Virtual Assistant"</li>
+          <li>Surface a tooltip on hover explaining the feature</li>
+        </ul>
+      </div>
+
+      <div class="issue">
+        <div class="issue-title"><span class="sev-badge sev-3">Major · 3</span> Issue 2.2 — "Reset cache" is developer jargon exposed to all users</div>
+        <div class="issue-meta"><strong>Location:</strong> Footer</div>
+        <p>Most dealership staff will not know what "reset cache" does and may click it accidentally, potentially disrupting their session or losing state.</p>
+        <ul class="rec-list">
+          <li>Remove from global footer; move to admin/settings</li>
+          <li>Rename to "Clear saved data and reload" with a confirmation dialog</li>
+        </ul>
+      </div>
+
+      <div class="issue">
+        <div class="issue-title"><span class="sev-badge sev-1">Cosmetic · 1</span> Issue 2.3 — "Persona switcher" uses internal UX terminology</div>
+        <div class="issue-meta"><strong>Location:</strong> Navigation — persona switcher</div>
+        <p>"Persona" is a design/internal term. End users expect "role", "profile", or "view".</p>
+        <ul class="rec-list">
+          <li>Rename to "Switch Role" or "My Profiles"</li>
+        </ul>
+      </div>
+
+      <h4>Positive Examples</h4>
+      <ul class="positives">
+        <li>✅ "Forgot your password?" uses natural, friendly language</li>
+        <li>✅ "Welcome back to your dealership workspace" is warm and context-appropriate</li>
+        <li>✅ "Start free trial" is a clear, real-world concept for new prospects</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- H3 -->
+  <div class="heuristic-block">
+    <div class="heuristic-header">
+      <h3>H3: User Control and Freedom</h3>
+      <span class="stars">⭐⭐☆☆☆ 2/5</span>
+    </div>
+    <div class="heuristic-body">
+
+      <div class="issue">
+        <div class="issue-title"><span class="sev-badge sev-3">Major · 3</span> Issue 3.1 — Setup wizard exit is ambiguous and progress may be lost</div>
+        <div class="issue-meta"><strong>Location:</strong> Setup wizard — Step 1 of 7</div>
+        <p>Two escape affordances exist ("Skip for now" and "Exit setup / Back") but it's unclear whether "Skip for now" skips the current step or the entire wizard, and whether exiting is permanent or resumable.</p>
+        <ul class="rec-list">
+          <li>Clarify labels: "Skip this step" vs. "Exit setup (you can resume later)"</li>
+          <li>Persist wizard progress and show "Resume setup" on next login</li>
+          <li>Add a confirmation on "Exit setup": "Your progress will be saved. Continue from Step 1 later."</li>
+        </ul>
+      </div>
+
+      <div class="issue">
+        <div class="issue-title"><span class="sev-badge sev-2">Minor · 2</span> Issue 3.2 — No undo for workflow actions</div>
+        <div class="issue-meta"><strong>Location:</strong> Apps / Workflows sections</div>
+        <p>No undo/redo affordance is described. In a dealership context (scheduling, inventory), accidental actions can have real-world consequences.</p>
+        <ul class="rec-list">
+          <li>Implement toast-based undo for reversible actions with a 5–10 second window</li>
+        </ul>
+      </div>
+
+      <h4>Positive Examples</h4>
+      <ul class="positives">
+        <li>✅ "Back" navigation in setup wizard allows step-by-step reversal</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- H4 -->
+  <div class="heuristic-block">
+    <div class="heuristic-header">
+      <h3>H4: Consistency and Standards</h3>
+      <span class="stars">⭐⭐⭐☆☆ 3/5</span>
+    </div>
+    <div class="heuristic-body">
+
+      <div class="issue">
+        <div class="issue-title"><span class="sev-badge sev-2">Minor · 2</span> Issue 4.1 — Two undifferentiated "Learn More" links</div>
+        <div class="issue-meta"><strong>Location:</strong> Dashboard content panels</div>
+        <p>Two identical "Learn More" links appear in close proximity with no context distinguishing their destinations — a common accessibility and consistency anti-pattern.</p>
+        <ul class="rec-list">
+          <li>Use descriptive link text: "Learn more about CDK Unify" and "Learn more about AI search"</li>
+        </ul>
+      </div>
+
+      <div class="issue">
+        <div class="issue-title"><span class="sev-badge sev-1">Cosmetic · 1</span> Issue 4.2 — Mixed CTA styles (links vs. buttons)</div>
+        <div class="issue-meta"><strong>Location:</strong> Various — "Start free trial" (link), "Sign In" (button), "Continue →" (button)</div>
+        <p>"Start free trial" appears as a hyperlink rather than a button despite being a primary conversion action.</p>
+        <ul class="rec-list">
+          <li>Standardize primary CTAs as buttons; reserve text links for secondary navigation</li>
+        </ul>
+      </div>
+
+      <h4>Positive Examples</h4>
+      <ul class="positives">
+        <li>✅ Consistent collapsible pattern across Recently Opened, Apps, Workflows, Resources</li>
+        <li>✅ Single Sign-On reduces the number of credentials users must manage</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- H5 -->
+  <div class="heuristic-block">
+    <div class="heuristic-header">
+      <h3>H5: Error Prevention</h3>
+      <span class="stars">⭐⭐☆☆☆ 2/5</span>
+    </div>
+    <div class="heuristic-body">
+
+      <div class="issue">
+        <div class="issue-title"><span class="sev-badge sev-3">Major · 3</span> Issue 5.1 — No inline validation on login form</div>
+        <div class="issue-meta"><strong>Location:</strong> Login — email/password fields</div>
+        <p>No real-time or inline validation is described. Users who enter a malformed email or leave a field blank will only discover the error after submission.</p>
+        <ul class="rec-list">
+          <li>Validate email format on blur</li>
+          <li>Show password strength indicator on focus</li>
+          <li>Disable "Sign In" until both fields are non-empty</li>
+        </ul>
+      </div>
+
+      <div class="issue">
+        <div class="issue-title"><span class="sev-badge sev-3">Major · 3</span> Issue 5.2 — "Reset cache" is a destructive one-click action with no confirmation</div>
+        <div class="issue-meta"><strong>Location:</strong> Footer</div>
+        <p>The action is one click away from any user with no confirmation, no description of consequences, and no undo. (Cross-references H2.)</p>
+        <ul class="rec-list">
+          <li>Gate behind a confirmation dialog; move out of footer entirely</li>
+        </ul>
+      </div>
+
+      <div class="issue">
+        <div class="issue-title"><span class="sev-badge sev-2">Minor · 2</span> Issue 5.3 — No auto-save mentioned in onboarding wizard</div>
+        <div class="issue-meta"><strong>Location:</strong> Setup wizard</div>
+        <p>A 7-step wizard with no stated auto-save creates risk of data loss if the session times out or the browser is closed.</p>
+        <ul class="rec-list">
+          <li>Auto-save on each step transition; display "Progress saved" confirmation</li>
+        </ul>
+      </div>
+
+      <h4>Positive Examples</h4>
+      <ul class="positives">
+        <li>✅ "Remember me" checkbox reduces re-authentication errors for repeat users</li>
+        <li>✅ Account creation directed to administrator reduces provisioning errors</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- H6 -->
+  <div class="heuristic-block">
+    <div class="heuristic-header">
+      <h3>H6: Recognition Rather Than Recall</h3>
+      <span class="stars">⭐⭐☆☆☆ 2/5</span>
+    </div>
+    <div class="heuristic-body">
+
+      <div class="issue">
+        <div class="issue-title"><span class="sev-badge sev-3">Major · 3</span> Issue 6.1 — Icon-heavy navigation without persistent labels</div>
+        <div class="issue-meta"><strong>Location:</strong> Primary navigation — Ask AI, AIVA, persona switcher</div>
+        <p>Several icon-driven navigation elements lack persistent text labels. Users must remember what each icon means rather than recognizing it at a glance.</p>
+        <ul class="rec-list">
+          <li>Ensure all navigation icons have visible text labels or always-visible tooltips on hover/focus</li>
+        </ul>
+      </div>
+
+      <div class="issue">
+        <div class="issue-title"><span class="sev-badge sev-2">Minor · 2</span> Issue 6.2 — "Recently Opened" history scope is unclear</div>
+        <div class="issue-meta"><strong>Location:</strong> Navigation — Recently Opened</div>
+        <p>No indication of how many items are retained, how far back history goes, or whether it persists across devices/sessions.</p>
+        <ul class="rec-list">
+          <li>Show item count, timestamp of last access, and clarify cross-device persistence</li>
+        </ul>
+      </div>
+
+      <div class="issue">
+        <div class="issue-title"><span class="sev-badge sev-2">Minor · 2</span> Issue 6.3 — Collapsed nav sections require memory</div>
+        <div class="issue-meta"><strong>Location:</strong> Apps / Workflows / Resources (all collapsible)</div>
+        <p>If all sections start collapsed, users must remember which section contains the app or workflow they need. No search within navigation or visible item counts.</p>
+        <ul class="rec-list">
+          <li>Show collapsed item counts (e.g., "Apps (12)")</li>
+          <li>Provide a navigation search/filter for power users</li>
+        </ul>
+      </div>
+
+      <h4>Positive Examples</h4>
+      <ul class="positives">
+        <li>✅ "Ask AI" button is labeled plainly — no memory required</li>
+        <li>✅ "Step 1 of 7" communicates wizard position without recall</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- H7 -->
+  <div class="heuristic-block">
+    <div class="heuristic-header">
+      <h3>H7: Flexibility and Efficiency of Use</h3>
+      <span class="stars">⭐⭐⭐☆☆ 3/5</span>
+    </div>
+    <div class="heuristic-body">
+
+      <div class="issue">
+        <div class="issue-title"><span class="sev-badge sev-2">Minor · 2</span> Issue 7.1 — No keyboard shortcuts</div>
+        <div class="issue-meta"><strong>Location:</strong> Global</div>
+        <p>No keyboard navigation shortcuts are surfaced. Enterprise users doing repetitive dealership tasks would benefit significantly.</p>
+        <ul class="rec-list">
+          <li>Implement a shortcut layer (e.g., <kbd>?</kbd> opens shortcut reference)</li>
+          <li>Ensure all interactive elements are keyboard-reachable</li>
+        </ul>
+      </div>
+
+      <div class="issue">
+        <div class="issue-title"><span class="sev-badge sev-2">Minor · 2</span> Issue 7.2 — No bulk actions in workflows</div>
+        <div class="issue-meta"><strong>Location:</strong> Workflows section</div>
+        <p>No bulk select or batch operation capability is evident. Staff managing high volumes of appointments or leads need efficiency tools.</p>
+        <ul class="rec-list">
+          <li>Add bulk action support (select multiple + action toolbar) in list views</li>
+        </ul>
+      </div>
+
+      <h4>Positive Examples</h4>
+      <ul class="positives">
+        <li>✅ AI-powered "Ask AI" search across all CDK systems is a major efficiency gain</li>
+        <li>✅ Persona switcher enables fast role context-switching</li>
+        <li>✅ Single dashboard replaces navigating multiple separate systems</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- H8 -->
+  <div class="heuristic-block">
+    <div class="heuristic-header">
+      <h3>H8: Aesthetic and Minimalist Design</h3>
+      <span class="stars">⭐⭐⭐☆☆ 3/5</span>
+    </div>
+    <div class="heuristic-body">
+
+      <div class="issue">
+        <div class="issue-title"><span class="sev-badge sev-3">Major · 3</span> Issue 8.1 — Login page mixes unauthenticated and authenticated content</div>
+        <div class="issue-meta"><strong>Location:</strong> Main landing / login state</div>
+        <p>The page simultaneously presents: a login form, a 7-step setup wizard, a product alert carousel, AI feature marketing copy, a free trial CTA, and support contact — all at once. Unauthenticated and authenticated states bleed together, creating high cognitive load on first impression.</p>
+        <ul class="rec-list">
+          <li>Separate concerns: unauthenticated users see only login + "New to CDK?" CTA</li>
+          <li>Onboarding wizard, alerts, and dashboard should appear only post-authentication</li>
+        </ul>
+      </div>
+
+      <div class="issue">
+        <div class="issue-title"><span class="sev-badge sev-2">Minor · 2</span> Issue 8.2 — Alert carousel competes with setup wizard for attention</div>
+        <div class="issue-meta"><strong>Location:</strong> Dashboard — top of page</div>
+        <p>A rotating alert carousel and a setup wizard both demand attention simultaneously with no clear visual hierarchy between them.</p>
+        <ul class="rec-list">
+          <li>Display alerts above the wizard with a visual separator</li>
+          <li>Use a persistent banner for active alerts rather than a carousel</li>
+        </ul>
+      </div>
+
+      <h4>Positive Examples</h4>
+      <ul class="positives">
+        <li>✅ Collapsible navigation sections keep the sidebar manageable</li>
+        <li>✅ Single dashboard concept reduces visual fragmentation across tools</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- H9 -->
+  <div class="heuristic-block">
+    <div class="heuristic-header">
+      <h3>H9: Help Users Recognize, Diagnose, and Recover from Errors</h3>
+      <span class="stars">⭐⭐☆☆☆ 2/5</span>
+    </div>
+    <div class="heuristic-body">
+
+      <div class="issue">
+        <div class="issue-title"><span class="sev-badge sev-3">Major · 3</span> Issue 9.1 — Login error messages are likely generic</div>
+        <div class="issue-meta"><strong>Location:</strong> Login form — post-submission error states</div>
+        <p>No error message copy is surfaced. Enterprise login systems frequently show generic "Invalid credentials" messages without guiding the user on whether the email is unrecognized, password is wrong, or account is locked.</p>
+        <ul class="rec-list">
+          <li>Unrecognized email: "We don't recognize that email. Check for typos or contact your administrator."</li>
+          <li>Wrong password: "Incorrect password. [X] attempts remaining before lockout."</li>
+          <li>Locked account: "Your account has been locked. Contact CDK Support or your administrator."</li>
+        </ul>
+      </div>
+
+      <div class="issue">
+        <div class="issue-title"><span class="sev-badge sev-2">Minor · 2</span> Issue 9.2 — No recovery path after accidental cache reset</div>
+        <div class="issue-meta"><strong>Location:</strong> Footer — reset cache action</div>
+        <p>If a user accidentally triggers cache reset and loses session state, there is no documented recovery path.</p>
+        <ul class="rec-list">
+          <li>Show a confirmation + undo toast after cache reset; log the action</li>
+        </ul>
+      </div>
+
+      <h4>Positive Examples</h4>
+      <ul class="positives">
+        <li>✅ "Forgot your password?" recovery link is prominently placed</li>
+        <li>✅ Administrator contact path for account issues is clearly stated</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- H10 -->
+  <div class="heuristic-block">
+    <div class="heuristic-header">
+      <h3>H10: Help and Documentation</h3>
+      <span class="stars">⭐⭐⭐☆☆ 3/5</span>
+    </div>
+    <div class="heuristic-body">
+
+      <div class="issue">
+        <div class="issue-title"><span class="sev-badge sev-2">Minor · 2</span> Issue 10.1 — Help is only a single external support link — no in-app docs</div>
+        <div class="issue-meta"><strong>Location:</strong> Footer / login page</div>
+        <p>The only help affordance is a "CDK Support" link. There is no in-app help center, searchable knowledge base, or contextual guidance anywhere in the described interface.</p>
+        <ul class="rec-list">
+          <li>Add a <strong>?</strong> help icon in the header linking to a searchable knowledge base</li>
+          <li>Add contextual tooltips on each wizard step explaining what's being configured and why</li>
+          <li>Surface a "Getting started" link for new users</li>
+        </ul>
+      </div>
+
+      <div class="issue">
+        <div class="issue-title"><span class="sev-badge sev-2">Minor · 2</span> Issue 10.2 — Setup wizard steps have no overview or time estimate</div>
+        <div class="issue-meta"><strong>Location:</strong> Setup wizard — Steps 1–7</div>
+        <p>"Step 1 of 7" is visible but there is no overview of what all 7 steps cover, so users can't assess time commitment or know what to prepare.</p>
+        <ul class="rec-list">
+          <li>Add a wizard intro screen: "Set up your workspace in 7 steps (~5 minutes). Here's what we'll cover: [step list]."</li>
+        </ul>
+      </div>
+
+      <h4>Positive Examples</h4>
+      <ul class="positives">
+        <li>✅ Contact path to CDK Support is present and clearly labeled</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- PRIORITIZED ACTIONS -->
+  <h2>Prioritized Action Items</h2>
+
+  <h3>Must Fix — Severity 3</h3>
+  <table>
+    <thead>
+      <tr><th>#</th><th>Issue</th><th>Heuristic</th><th>Effort</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>Login error messages are generic / undescribed</td><td>H9</td><td>Low</td></tr>
+      <tr><td>2</td><td>"Reset cache" — destructive, unexplained, one-click in footer</td><td>H2, H5</td><td>Low</td></tr>
+      <tr><td>3</td><td>Setup wizard exit ambiguity + no progress persistence</td><td>H3</td><td>Medium</td></tr>
+      <tr><td>4</td><td>No inline validation on login form</td><td>H5</td><td>Low</td></tr>
+      <tr><td>5</td><td>Login page mixes unauthenticated + authenticated states</td><td>H8</td><td>High</td></tr>
+      <tr><td>6</td><td>Navigation relies on icon memory without persistent labels</td><td>H6</td><td>Medium</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Should Fix — Severity 2</h3>
+  <table>
+    <thead>
+      <tr><th>#</th><th>Issue</th><th>Heuristic</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>Product alert lacks severity, status, and recency indicators</td><td>H1</td></tr>
+      <tr><td>2</td><td>"AIVA" jargon not explained at first encounter</td><td>H2</td></tr>
+      <tr><td>3</td><td>Two undifferentiated "Learn More" links</td><td>H4</td></tr>
+      <tr><td>4</td><td>No auto-save in 7-step setup wizard</td><td>H5</td></tr>
+      <tr><td>5</td><td>Collapsed nav sections require memory; no item counts or search</td><td>H6</td></tr>
+      <tr><td>6</td><td>No keyboard shortcuts</td><td>H7</td></tr>
+      <tr><td>7</td><td>No bulk actions in workflow list views</td><td>H7</td></tr>
+      <tr><td>8</td><td>Alert carousel competes with setup wizard for attention</td><td>H8</td></tr>
+      <tr><td>9</td><td>Setup wizard steps have no overview or time estimate</td><td>H10</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Nice to Have — Severity 1</h3>
+  <table>
+    <thead>
+      <tr><th>#</th><th>Issue</th><th>Heuristic</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>"Persona switcher" should use user-facing language</td><td>H2</td></tr>
+      <tr><td>2</td><td>Mixed CTA styling: links vs. buttons</td><td>H4</td></tr>
+      <tr><td>3</td><td>"1 of 2" alert carousel gives no preview of next alert</td><td>H1</td></tr>
+      <tr><td>4</td><td>"Recently Opened" history scope not communicated</td><td>H6</td></tr>
+    </tbody>
+  </table>
+
+  <!-- QUICK WINS -->
+  <h2>Quick Wins</h2>
+  <p style="font-size:13px;color:#555;margin-bottom:10px;">High impact, low effort — do these first.</p>
+  <ul class="quick-wins">
+    <li>Add descriptive login error messages per failure scenario — prevents support tickets, takes hours to implement</li>
+    <li>Add confirmation + plain-language description to "Reset cache" — prevents accidental data loss</li>
+    <li>Inline email/password validation on login form — reduces failed login frustration</li>
+    <li>Add tooltips to AIVA and persona switcher — removes jargon confusion immediately</li>
+    <li>Replace duplicate "Learn More" links with descriptive anchor text — accessibility + clarity win</li>
+  </ul>
+
+  <!-- POSITIVE HIGHLIGHTS -->
+  <h2>Positive Highlights</h2>
+  <ul class="positives" style="margin-bottom:8px;">
+    <li>✅ <strong>AI-powered "Ask AI" search</strong> across all CDK systems is a genuine efficiency differentiator and well-labeled</li>
+    <li>✅ <strong>Single dashboard SSO</strong> reduces credential fatigue and context-switching — the core value proposition is sound</li>
+    <li>✅ <strong>"Step 1 of 7" progress indicator</strong> is a good pattern that should be extended to other multi-step flows</li>
+    <li>✅ <strong>"Welcome back" copy</strong> is warm and context-aware — sets the right tone for returning users</li>
+    <li>✅ <strong>Collapsible nav sections</strong> keep the sidebar manageable as the product scales</li>
+  </ul>
+
+  <!-- RECOMMENDATIONS -->
+  <h2>Recommendations Timeline</h2>
+  <ul class="timeline">
+    <li class="tl-imm">
+      <strong>Immediate — 1 to 2 weeks</strong>
+      Replace "Reset cache" footer link with a gated, plain-language settings action · Add descriptive login error messages for each failure scenario · Add inline validation to email and password fields · Clarify wizard exit labels and confirm progress persistence
+    </li>
+    <li class="tl-short">
+      <strong>Short-term — 1 to 2 months</strong>
+      Separate login-state UI from post-auth dashboard content · Add persistent text labels or always-visible tooltips to all navigation icons · Build wizard intro screen with step overview and time estimate · Upgrade product alert component: add status, severity, recency; remove stale 2024 alert
+    </li>
+    <li class="tl-long">
+      <strong>Long-term — 3+ months</strong>
+      Build in-app searchable help center with contextual tooltips throughout · Implement keyboard navigation shortcuts with discoverable help overlay · Add bulk actions and advanced filters to workflow list views · Conduct usability testing with dealership staff to validate findings and surface post-auth edge cases
+    </li>
+  </ul>
+
+  <!-- METHODOLOGY -->
+  <h2>Methodology Notes</h2>
+  <p style="font-size:13px;color:#555;"><strong>Method:</strong> Expert heuristic evaluation per Nielsen's 10 Usability Heuristics (Nielsen, 1994). <strong>Evaluator:</strong> AI agent simulating UX expert. <strong>Scope:</strong> Publicly accessible login/landing state and described dashboard structure at https://bluecarbon.site. <strong>Limitations:</strong> Post-authentication flows, form validation behavior, and internal workflow screens were not directly accessible — findings on those areas are inferred from standard enterprise SaaS patterns and should be verified against the live authenticated interface. <strong>Complement with:</strong> Authenticated session walkthrough, user testing with dealership staff personas (new hire vs. experienced service advisor), WCAG 2.2 accessibility audit.</p>
+
+  <p style="font-size:13px;color:#555;margin-top:10px;"><strong>Reference:</strong> Nielsen, J. (1994). "10 Usability Heuristics for User Interface Design." Nielsen Norman Group — <a href="https://www.nngroup.com/articles/ten-usability-heuristics/" style="color:#0057b8;">nngroup.com</a></p>
+
+  <div class="report-footer">
+    Nielsen Heuristics UX Audit &nbsp;·&nbsp; bluecarbon.site &nbsp;·&nbsp; 2026-06-12 &nbsp;·&nbsp; Generated by Nielsen Heuristics Audit Skill v1.0
+  </div>
+
+</div>
+</body>
+</html>
