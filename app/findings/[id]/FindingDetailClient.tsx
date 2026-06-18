@@ -118,7 +118,7 @@ export default function FindingDetailClient({ id }: Props) {
           </p>
         )}
         <p className="text-lg font-semibold text-gray-900">{finding.screen}</p>
-        <p className="text-sm text-gray-500 mt-1">{finding.iteration}</p>
+        <p className="text-sm text-gray-500 mt-1">{finding.version}</p>
       </div>
 
       {/* Screenshot */}
@@ -165,8 +165,8 @@ export default function FindingDetailClient({ id }: Props) {
           <p className="font-medium text-gray-700">{finding.source}</p>
         </div>
         <div>
-          <p className="text-xs text-gray-400 mb-0.5">Iteration</p>
-          <p className="font-medium text-gray-700">{finding.iteration}</p>
+          <p className="text-xs text-gray-400 mb-0.5">Version</p>
+          <p className="font-medium text-gray-700">{finding.version}</p>
         </div>
         <div>
           <p className="text-xs text-gray-400 mb-0.5">Severity</p>

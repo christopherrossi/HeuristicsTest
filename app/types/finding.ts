@@ -8,7 +8,7 @@ export interface Finding {
   recommendation: string;
   source: string;
   prototype?: string;
-  iteration: string;
+  version: string;
   createdAt: string;
 }
 

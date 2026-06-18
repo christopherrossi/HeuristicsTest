@@ -53,7 +53,7 @@ export function exportFigJam(findings: Finding[]): void {
       `Severity: ${f.severity} – ${severityLabels[f.severity]}`,
       `Screen/Flow: ${f.screen}`,
       `Source: ${f.source}`,
-      `Iteration: ${f.iteration}`,
+      `Version: ${f.version}`,
       ``,
       `OBSERVATION:`,
       f.observation,

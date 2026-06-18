@@ -13,7 +13,7 @@ export default function Dashboard() {
   const [filterSeverity, setFilterSeverity] = useState("");
   const [filterSource, setFilterSource] = useState("");
   const [filterPrototype, setFilterPrototype] = useState("");
-  const [filterIteration, setFilterIteration] = useState("");
+  const [filterVersion, setFilterVersion] = useState("");
 
   useEffect(() => {
     setFindings(getFindings());
@@ -30,8 +30,8 @@ export default function Dashboard() {
     () => [...new Set(findings.map((f) => f.prototype).filter(Boolean))],
     [findings]
   );
-  const iterations = useMemo(
-    () => [...new Set(findings.filter((f) => !filterPrototype || f.prototype === filterPrototype).map((f) => f.iteration))],
+  const versions = useMemo(
+    () => [...new Set(findings.filter((f) => !filterPrototype || f.prototype === filterPrototype).map((f) => f.version))],
     [findings, filterPrototype]
   );
 
@@ -41,8 +41,8 @@ export default function Dashboard() {
       .filter((f) => !filterSeverity || f.severity === parseInt(filterSeverity))
       .filter((f) => !filterSource || f.source === filterSource)
       .filter((f) => !filterPrototype || f.prototype === filterPrototype)
-      .filter((f) => !filterIteration || f.iteration === filterIteration);
-  }, [findings, filterHeuristic, filterSeverity, filterSource, filterPrototype, filterIteration]);
+      .filter((f) => !filterVersion || f.version === filterVersion);
+  }, [findings, filterHeuristic, filterSeverity, filterSource, filterPrototype, filterVersion]);
 
   // Stats
   const total = findings.length;
@@ -51,12 +51,12 @@ export default function Dashboard() {
     count: findings.filter((f) => f.severity === s).length,
   }));
 
-  // Build grouped structure: prototype → iteration → findings
+  // Build grouped structure: prototype → version → findings
   const grouped = useMemo(() => {
     const protoMap = new Map<string, Map<string, Finding[]>>();
     for (const f of filtered) {
       const proto = f.prototype || "No Prototype";
-      const iter = f.iteration || "No Iteration";
+      const iter = f.version || "No Version";
       if (!protoMap.has(proto)) protoMap.set(proto, new Map());
       const iterMap = protoMap.get(proto)!;
       if (!iterMap.has(iter)) iterMap.set(iter, []);
@@ -119,17 +119,17 @@ export default function Dashboard() {
             <option value="">All severities</option>
             {[0, 1, 2, 3].map((s) => <option key={s} value={s}>{s} – {SEVERITY_LABELS[s]}</option>)}
           </select>
-          <select value={filterPrototype} onChange={(e) => { setFilterPrototype(e.target.value); setFilterIteration(""); }} className="rounded-md border border-gray-300 px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <select value={filterPrototype} onChange={(e) => { setFilterPrototype(e.target.value); setFilterVersion(""); }} className="rounded-md border border-gray-300 px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
             <option value="">All prototypes</option>
             {prototypes.map((p) => <option key={p} value={p}>{p}</option>)}
           </select>
-          <select value={filterIteration} onChange={(e) => setFilterIteration(e.target.value)} className="rounded-md border border-gray-300 px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            <option value="">All iterations</option>
-            {iterations.map((it) => <option key={it} value={it}>{it}</option>)}
+          <select value={filterVersion} onChange={(e) => setFilterVersion(e.target.value)} className="rounded-md border border-gray-300 px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="">All versions</option>
+            {versions.map((it) => <option key={it} value={it}>{it}</option>)}
           </select>
         </div>
-        {(filterHeuristic || filterSeverity || filterSource || filterPrototype || filterIteration) && (
-          <button onClick={() => { setFilterHeuristic(""); setFilterSeverity(""); setFilterSource(""); setFilterPrototype(""); setFilterIteration(""); }} className="mt-2 text-xs text-indigo-600 hover:text-indigo-800">
+        {(filterHeuristic || filterSeverity || filterSource || filterPrototype || filterVersion) && (
+          <button onClick={() => { setFilterHeuristic(""); setFilterSeverity(""); setFilterSource(""); setFilterPrototype(""); setFilterVersion(""); }} className="mt-2 text-xs text-indigo-600 hover:text-indigo-800">
             Clear all filters
           </button>
         )}
@@ -156,11 +156,11 @@ export default function Dashboard() {
                 <span className="text-xs text-gray-400 font-medium">{[...iterMap.values()].flat().length} finding{[...iterMap.values()].flat().length !== 1 ? "s" : ""}</span>
               </div>
 
-              {/* Iterations within this prototype */}
+              {/* Versions within this prototype */}
               <div className="space-y-4">
                 {[...iterMap.entries()].map(([iter, iterFindings]) => (
                   <div key={iter} className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                    {/* Iteration subheader */}
+                    {/* Version subheader */}
                     <div className="px-4 py-2.5 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
                       <span className="text-sm font-semibold text-gray-600">{iter}</span>
                       <span className="text-xs text-gray-400">{iterFindings.length} finding{iterFindings.length !== 1 ? "s" : ""}</span>

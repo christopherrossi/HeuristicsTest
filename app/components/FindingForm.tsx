@@ -37,16 +37,16 @@ export default function FindingForm({ initialFinding, onSave }: Props) {
   const [observation, setObservation] = useState(initialFinding?.observation ?? "");
   const [recommendation, setRecommendation] = useState(initialFinding?.recommendation ?? "");
   const [source, setSource] = useState(initialFinding?.source ?? "");
-  const [iteration, setIteration] = useState(initialFinding?.iteration ?? "");
+  const [version, setVersion] = useState(initialFinding?.version ?? "");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [existingPrototypes, setExistingPrototypes] = useState<string[]>([]);
-  const [existingIterations, setExistingIterations] = useState<string[]>([]);
+  const [existingVersions, setExistingVersions] = useState<string[]>([]);
 
   useEffect(() => {
     const all = getFindings();
     setExistingPrototypes([...new Set(all.map((f) => f.prototype).filter((p): p is string => Boolean(p)))]);
-    setExistingIterations([...new Set(all.filter((f) => !prototype || f.prototype === prototype).map((f) => f.iteration).filter(Boolean))]);
+    setExistingVersions([...new Set(all.filter((f) => !prototype || f.prototype === prototype).map((f) => f.version).filter(Boolean))]);
   }, [prototype]);
 
   const selectedHeuristic = HEURISTICS.find((h) => h.label === heuristic);
@@ -66,7 +66,7 @@ export default function FindingForm({ initialFinding, onSave }: Props) {
     if (!observation.trim()) errs.observation = "Observation is required";
     if (!recommendation.trim()) errs.recommendation = "Recommendation is required";
     if (!source.trim()) errs.source = "Source is required";
-    if (!iteration.trim()) errs.iteration = "Iteration is required";
+    if (!version.trim()) errs.version = "Version is required";
     setErrors(errs);
     return Object.keys(errs).length === 0;
   }
@@ -84,7 +84,7 @@ export default function FindingForm({ initialFinding, onSave }: Props) {
       observation,
       recommendation,
       source,
-      iteration,
+      version,
       createdAt: initialFinding?.createdAt ?? new Date().toISOString(),
     };
     saveFinding(finding);
@@ -207,7 +207,7 @@ export default function FindingForm({ initialFinding, onSave }: Props) {
         {errors.recommendation && <p className="mt-1 text-xs text-red-600">{errors.recommendation}</p>}
       </div>
 
-      {/* Source + Iteration */}
+      {/* Source + Version */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Source (evaluator name)</label>
@@ -216,14 +216,14 @@ export default function FindingForm({ initialFinding, onSave }: Props) {
           {errors.source && <p className="mt-1 text-xs text-red-600">{errors.source}</p>}
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Iteration</label>
-          <input type="text" list="iteration-options" value={iteration} onChange={(e) => setIteration(e.target.value)}
+          <label className="block text-sm font-medium text-gray-700 mb-1">Version</label>
+          <input type="text" list="version-options" value={version} onChange={(e) => setVersion(e.target.value)}
             placeholder="e.g. v2, May 2026"
-            className={`w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 ${errors.iteration ? "border-red-400" : "border-gray-300"}`} />
-          <datalist id="iteration-options">
-            {existingIterations.map((it) => <option key={it} value={it} />)}
+            className={`w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 ${errors.version ? "border-red-400" : "border-gray-300"}`} />
+          <datalist id="version-options">
+            {existingVersions.map((it) => <option key={it} value={it} />)}
           </datalist>
-          {errors.iteration && <p className="mt-1 text-xs text-red-600">{errors.iteration}</p>}
+          {errors.version && <p className="mt-1 text-xs text-red-600">{errors.version}</p>}
         </div>
       </div>
 
