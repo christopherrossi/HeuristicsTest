@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import { Finding, HEURISTICS, SEVERITY_LABELS } from "@/app/types/finding";
-import { saveFinding } from "@/app/utils/storage";
+import { saveFinding, getFindings } from "@/app/utils/storage";
 
 interface Props {
   initialFinding?: Finding;
@@ -51,6 +51,9 @@ const SEVERITY_DESCRIPTIONS: Record<number, string> = {
 export default function FindingForm({ initialFinding, onSave }: Props) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const existingFindings = getFindings();
+  const existingPrototypes = [...new Set(existingFindings.map((f) => f.prototype).filter(Boolean))];
+  const existingIterations = [...new Set(existingFindings.filter((f) => !prototype || f.prototype === prototype).map((f) => f.iteration).filter(Boolean))];
 
   const [heuristic, setHeuristic] = useState(
     initialFinding?.heuristic ?? HEURISTICS[0].label
@@ -136,6 +139,7 @@ export default function FindingForm({ initialFinding, onSave }: Props) {
           type="text"
           value={prototype}
           onChange={(e) => setPrototype(e.target.value)}
+          list="prototype-options"
           placeholder="e.g. Checkout redesign, Onboarding v3"
           className={`w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
             errors.prototype ? 'border-red-400' : 'border-gray-300'
@@ -146,7 +150,10 @@ export default function FindingForm({ initialFinding, onSave }: Props) {
         )}
       </div>
 
-            {/* Heuristic */}
+              <datalist id="prototype-options">
+          {existingPrototypes.map((p) => <option key={p} value={p} />)}
+        </datalist>
+      {/* Heuristic */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Heuristic
@@ -364,6 +371,7 @@ export default function FindingForm({ initialFinding, onSave }: Props) {
             type="text"
             value={iteration}
             onChange={(e) => setIteration(e.target.value)}
+            list="iteration-options"
             placeholder="e.g. v2 prototype, May 2026"
             className={`w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
               errors.iteration ? "border-red-400" : "border-gray-300"
@@ -372,6 +380,9 @@ export default function FindingForm({ initialFinding, onSave }: Props) {
           {errors.iteration && (
             <p className="mt-1 text-xs text-red-600">{errors.iteration}</p>
           )}
+          <datalist id="iteration-options">
+            {existingIterations.map((it) => <option key={it} value={it} />)}
+          </datalist>
         </div>
       </div>
 
