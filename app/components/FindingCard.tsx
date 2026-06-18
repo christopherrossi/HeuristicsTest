@@ -30,7 +30,7 @@ export default function FindingCard({ finding }: Props) {
       <p className="text-sm font-medium text-gray-900 mb-1">{finding.screen}</p>
       <p className="text-sm text-gray-600 line-clamp-2 mb-3">{finding.observation}</p>
       <div className="flex items-center justify-between">
-        <span className="text-xs text-gray-400">{finding.iteration}</span>
+        <span className="text-xs text-gray-400">{finding.version}</span>
         <Link
           href={`/findings/${finding.id}`}
           className="text-xs font-medium text-indigo-600 hover:text-indigo-800"
