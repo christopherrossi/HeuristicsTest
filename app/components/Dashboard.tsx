@@ -92,20 +92,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Overall severity stats */}
-      {total > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-          {bySeverity.map(({ severity, count }) => {
-            const colors = SEVERITY_COLORS[severity];
-            return (
-              <div key={severity} className={`rounded-lg border ${colors.border} ${colors.bg} px-4 py-3`}>
-                <p className={`text-2xl font-bold ${colors.text}`}>{count}</p>
-                <p className="text-xs font-medium text-gray-500 mt-0.5">{SEVERITY_LABELS[severity]}</p>
-              </div>
-            );
-          })}
-        </div>
-      )}
 
       {/* Filters */}
       <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
@@ -151,9 +137,23 @@ export default function Dashboard() {
           {[...grouped.entries()].map(([proto, iterMap]) => (
             <div key={proto}>
               {/* Prototype header */}
-              <div className="flex items-center gap-3 mb-3">
-                <h2 className="text-lg font-bold text-gray-900">{proto}</h2>
-                <span className="text-xs text-gray-400 font-medium">{[...iterMap.values()].flat().length} finding{[...iterMap.values()].flat().length !== 1 ? "s" : ""}</span>
+              <div className="mb-3">
+                <div className="flex items-center gap-3 mb-2">
+                  <h2 className="text-lg font-bold text-gray-900">{proto}</h2>
+                  <span className="text-xs text-gray-400 font-medium">{[...iterMap.values()].flat().length} finding{[...iterMap.values()].flat().length !== 1 ? "s" : ""}</span>
+                </div>
+                <div className="grid grid-cols-4 gap-2">
+                  {([0, 1, 2, 3] as const).map((sev) => {
+                    const count = [...iterMap.values()].flat().filter((f) => f.severity === sev).length;
+                    const colors = SEVERITY_COLORS[sev];
+                    return (
+                      <div key={sev} className={`rounded-lg border ${colors.border} ${colors.bg} px-3 py-2`}>
+                        <p className={`text-xl font-bold ${colors.text}`}>{count}</p>
+                        <p className="text-xs font-medium text-gray-500">{SEVERITY_LABELS[sev]}</p>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Versions within this prototype */}
