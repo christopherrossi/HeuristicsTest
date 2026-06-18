@@ -111,6 +111,7 @@ export default function FindingForm({ initialFinding, onSave }: Props) {
       screenshot,
       observation,
       recommendation,
+      prototype,
       source,
       iteration,
       createdAt: initialFinding?.createdAt ?? new Date().toISOString(),
