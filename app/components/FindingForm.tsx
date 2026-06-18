@@ -51,9 +51,13 @@ const SEVERITY_DESCRIPTIONS: Record<number, string> = {
 export default function FindingForm({ initialFinding, onSave }: Props) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const existingFindings = getFindings();
-  const existingPrototypes = [...new Set(existingFindings.map((f) => f.prototype).filter(Boolean))];
-  const existingIterations = [...new Set(existingFindings.filter((f) => !prototype || f.prototype === prototype).map((f) => f.iteration).filter(Boolean))];
+  const [existingPrototypes, setExistingPrototypes] = useState<string[]>([]);
+  const [existingIterations, setExistingIterations] = useState<string[]>([]);
+  useEffect(() => {
+    const all = getFindings();
+    setExistingPrototypes([...new Set(all.map((f) => f.prototype).filter((p): p is string => Boolean(p)))]);
+    setExistingIterations([...new Set(all.filter((f) => !prototype || f.prototype === prototype).map((f) => f.iteration).filter(Boolean))]);
+  }, [prototype]);
 
   const [heuristic, setHeuristic] = useState(
     initialFinding?.heuristic ?? HEURISTICS[0].label
