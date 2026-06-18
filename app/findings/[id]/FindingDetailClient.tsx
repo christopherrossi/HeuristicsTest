@@ -127,11 +127,14 @@ export default function FindingDetailClient({ id }: Props) {
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
             Screenshot
           </p>
-          <img
-            src={finding.screenshot}
-            alt="Finding screenshot"
-            className="w-full rounded border border-gray-200 max-h-80 object-contain"
-          />
+          <a href={finding.screenshot} target="_blank" rel="noopener noreferrer">
+            <img
+              src={finding.screenshot}
+              alt="Finding screenshot"
+              className="w-full rounded border border-gray-200 cursor-zoom-in"
+            />
+          </a>
+          <p className="text-xs text-gray-400 mt-1 text-center">Click to open full size</p>
         </div>
       )}
 
