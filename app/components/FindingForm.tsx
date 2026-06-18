@@ -69,6 +69,7 @@ export default function FindingForm({ initialFinding, onSave }: Props) {
     initialFinding?.recommendation ?? ""
   );
   const [source, setSource] = useState(initialFinding?.source ?? "Claude");
+  const [prototype, setPrototype] = useState(initialFinding?.prototype ?? "");
   const [iteration, setIteration] = useState(initialFinding?.iteration ?? "");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
@@ -92,6 +93,7 @@ export default function FindingForm({ initialFinding, onSave }: Props) {
     if (!recommendation.trim())
       errs.recommendation = "Recommendation is required";
     if (!source.trim()) errs.source = "Source is required";
+    if (!prototype.trim()) errs.prototype = "Prototype is required";
     if (!iteration.trim()) errs.iteration = "Iteration is required";
     setErrors(errs);
     return Object.keys(errs).length === 0;
