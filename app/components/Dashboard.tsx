@@ -37,7 +37,7 @@ export default function Dashboard() {
 
   const filtered = useMemo(() => {
     return findings
-      .filter((f) => !filterHeeuristic || f.heuristic === filterHeeuristic)
+      .filter((f) => !filterHeuristic || f.heuristic === filterHeuristic)
       .filter((f) => !filterSeverity || f.severity === parseInt(filterSeverity))
       .filter((f) => !filterSource || f.source === filterSource)
       .filter((f) => !filterPrototype || f.prototype === filterPrototype)
