@@ -7,7 +7,7 @@ export interface Finding {
   observation: string;
   recommendation: string;
   source: string;
-  prototype: string;
+  prototype?: string;
   iteration: string;
   createdAt: string;
 }
